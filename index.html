@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeilOS</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+  </head>
+
+  <body>
+    <div id="bg"></div>
+    <div id="grid"></div>
+
+    <div id="bootscreen">
+      <div class="boot-logo"></div>
+      <h1>NeilOS</h1>
+      <p>Initializing Kernel...</p>
+    </div>
+
+    <div id="desktop">
+      <div class="icon" onclick="openApp('bank')">💰 Bank</div>
+      <div class="icon" onclick="openApp('files')">📁 Files</div>
+      <div class="icon" onclick="openApp('games')">🎮 Games</div>
+      <div class="icon" onclick="openApp('terminal')">💻 Terminal</div>
+      <div class="icon" onclick="openApp('search')">🔎 Search</div>
+      <div class="icon" onclick="openApp('cyber')">🛡 Cyber Security</div>
+      <div class="icon" onclick="openApp('network')">🌐 Network</div>
+      <div class="icon" onclick="openApp('ai')">🤖 AI Assistant</div>
+      <div class="icon" onclick="openApp('clinic')">🏥 Clinic</div>
+      <div class="icon" onclick="openApp('social')">🌍 SocialNet</div>
+      <div class="icon" onclick="openApp('deploy')">🚀 Deployment</div>
+      <div class="icon" onclick="openApp('kernel')">⚙ Kernel</div>
+      <div class="icon" onclick="openApp('monitor')">📊 System Monitor</div>
+      <div class="icon" onclick="openApp('api')">🌐 API</div>
+    </div>
+    <!-- CYBER SECURITY DIV FUNCTION -->
+
+    <div id="cyber-security-app">
+      <!-- HEADER -->
+      <div class="app-header">
+        <span>🛡 Cyber Security</span>
+
+        <button onclick="closeCyberApp()">✖</button>
+      </div>
+
+      <!-- BODY -->
+      <div class="app-body">
+        <!-- SIDEBAR -->
+        <div class="app-sidebar">
+          <button onclick="runCyberCrack()">🚀 Start Engine</button>
+
+          <button onclick="scanSystem()">🌐 Scan Network</button>
+
+          <button onclick="showThreats()">🛡 Threat Monitor</button>
+
+          <button onclick="clearTerminal()">🧹 Clear Logs</button>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="app-main">
+          <!-- IP INPUT -->
+          <div class="scanner-box">
+            <input type="text" id="ip" placeholder="Enter IP Address" />
+          </div>
+
+          <!-- TERMINAL -->
+          <div id="cyberCrackTerminal" class="terminal">
+            [ CYBER SECURITY READY ]
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      #cyber-security-app {
+        width: 100%;
+        height: 650px;
+        background: #070b14;
+        color: #00ffee;
+        font-family: Consolas, monospace;
+        border: 2px solid #00ffee;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+      }
+
+      .app-header {
+        height: 60px;
+        background: linear-gradient(90deg, #001a2d, #00334d);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-bottom: 1px solid #00ffee;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      .app-header button {
+        background: red;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .app-body {
+        display: flex;
+        height: calc(100% - 60px);
+      }
+
+      .app-sidebar {
+        width: 220px;
+        background: #0b1020;
+        border-right: 1px solid #00ffee;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .app-sidebar button {
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #00ffaa, #00ccff);
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .app-sidebar button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px cyan;
+      }
+
+      .app-main {
+        flex: 1;
+        padding: 20px;
+      }
+
+      .scanner-box {
+        margin-bottom: 15px;
+      }
+
+      .scanner-box input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #00ffee;
+        background: #111827;
+        color: white;
+        outline: none;
+      }
+
+      .terminal {
+        height: 500px;
+        background: black;
+        border: 1px solid #00ffee;
+        border-radius: 10px;
+        padding: 15px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        color: #00ff99;
+        box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.2);
+      }
+    </style>
+
+    <script>
+      // CLOSE APP
+      function closeCyberApp() {
+        document.getElementById("cyber-security-app").style.display = "none";
+      }
+
+      // START ENGINE
+      function runCyberCrack() {
+        const terminal = document.getElementById("cyberCrackTerminal");
+
+        terminal.innerHTML = `
+
+==================================================
+        CYBERCRACK UNIFIED ENGINE
+==================================================
+
+[✓] Initializing CyberOS Core...
+[✓] Loading SQL Injector Module...
+[✓] Loading Metasploit Framework...
+[✓] Loading Wireshark Packet Engine...
+[✓] Loading Nmap Recon Scanner...
+[✓] Loading Burp Suite Proxy...
+[✓] Loading Hashcat GPU Engine...
+[✓] Loading Threat Intelligence...
+[✓] Starting Malware Analyzer...
+[✓] Starting Secure Firewall...
+[✓] Starting Network Monitor...
+[✓] Connecting Sandbox Environment...
+
+--------------------------------------------------
+
+[SQL Injector]
+Status : ACTIVE
+
+[Metasploit]
+Payload Handler Ready
+
+[Wireshark]
+Live Packet Capture Enabled
+
+[Nmap Scanner]
+Recon Engine Active
+
+[Burp Suite]
+Proxy Listening : 127.0.0.1:8080
+
+[Hashcat]
+GPU Enabled
+
+--------------------------------------------------
+
+[SYSTEM STATUS]
+
+CPU Usage : 18%
+RAM Usage : 42%
+Firewall : ENABLED
+Sandbox : ACTIVE
+Threat Level : LOW
+
+--------------------------------------------------
+
+[✓] CyberCrack fully initialized successfully.
+
+`;
+      }
+
+      // NETWORK SCANNER
+      function scanSystem() {
+        let ip = document.getElementById("ip").value;
+
+        if (ip === "") {
+          alert("Enter IP Address");
+          return;
+        }
+
+        document.getElementById("cyberCrackTerminal").innerHTML = `
+
+==================================================
+          NETWORK SECURITY SCANNER
+==================================================
+
+Target : ${ip}
+
+[✓] Firewall : ACTIVE
+[✓] Ports : SECURE
+[✓] Threat Scan : CLEAN
+
+Open Ports:
+22  - SSH
+80  - HTTP
+443 - HTTPS
+
+Intrusion Detection : ACTIVE
+
+[✓] Scan Completed Successfully
+
+`;
+      }
+
+      // THREAT MONITOR
+      function showThreats() {
+        document.getElementById("cyberCrackTerminal").innerHTML = `
+
+==================================================
+            THREAT MONITOR SYSTEM
+==================================================
+
+[✓] AI Threat Detection Running
+[✓] Monitoring Network Packets
+[✓] Malware Signatures Updated
+[✓] Firewall Protection Enabled
+
+Threat Level : LOW
+
+No active attacks detected.
+
+System Security : STABLE
+
+`;
+      }
+
+      // CLEAR TERMINAL
+      function clearTerminal() {
+        document.getElementById("cyberCrackTerminal").innerHTML =
+          "[ TERMINAL CLEARED ]";
+      }
+    </script>
+
+    <!-- BANK -->
+    <div class="window" id="bank">
+      <h2>💰 Banking System</h2>
+      <input id="user" placeholder="username" />
+      <input id="amt" type="number" placeholder="amount" />
+      <button onclick="deposit()">Deposit</button>
+      <button onclick="withdraw()">Withdraw</button>
+      <h1 id="balance">₹0</h1>
+      <pre id="transactions"></pre>
+    </div>
+
+    <!-- FILES -->
+    <div class="window" id="files">
+      <h2>📁 File Manager</h2>
+      <input id="fname" placeholder="filename" />
+      <button onclick="addFile()">Create File</button>
+      <div id="filelist"></div>
+    </div>
+
+    <div id="terminal">
+      <div id="output"></div>
+
+      <div class="prompt">
+        <span>C:\NeilOS></span>
+        <input id="cmdInput" autocomplete="off" />
+      </div>
+    </div>
+
+    <style>
+      #terminal {
+        background: black;
+        color: #00ff00;
+        font-family: Consolas, monospace;
+        padding: 10px;
+        height: 400px;
+        overflow: auto;
+      }
+
+      .prompt {
+        display: flex;
+        align-items: center;
+      }
+
+      #cmdInput {
+        flex: 1;
+        background: black;
+        color: #00ff00;
+        border: none;
+        outline: none;
+        font-family: Consolas, monospace;
+      }
+    </style>
+
+    <script>
+            const output = document.getElementById("output");
+            const input = document.getElementById("cmdInput");
+
+            input.addEventListener("keydown", (e) => {
+              if (e.key !== "Enter") return;
+
+              const cmd = input.value.trim();
+
+              output.innerHTML += `<div>C:\\NeilOS&gt; ${cmd}</div>`;
+
+              switch (cmd.toLowerCase()) {
+                case "help":
+                  output.innerHTML += `
+                      <div>
+                      help<br>
+                      dir<br>
+                      cls<br>
+                      ver<br>
+                      date<br>
+                      time
+                      </div>`;
+                  break;
+
+                case "dir":
+                  output.innerHTML += `
+                      <div>
+                      Desktop<br>
+                      Documents<br>
+                      Downloads<br>
+                      System32
+                      </div>`;
+                  break;
+
+                case "ver":
+                  output.innerHTML += "<div>NeilOS Command Processor v1.0</div>";
+                  break;
+
+                case "date":
+                  output.innerHTML += `<div>${new Date().toLocaleDateString()}</div>`;
+                  break;
+
+                case "time":
+                  output.innerHTML += `<div>${new Date().toLocaleTimeString()}</div>`;
+                  break;
+
+                case "cls":
+                  output.innerHTML = "";
+                  break;
+
+                default:
+                  output.innerHTML += `<div>'${cmd}' is not recognized as a command.</div>`;
+              }
+
+              input.value = "";
+              output.scrollTop = output.scrollHeight;
+            });
+            <div id="output"></div>
+
+      <input id="cmdInput" placeholder="Enter command">
+      <button onclick="runCommand()">Run</button>
+      async function runCommand() {
+
+          const cmd = document.getElementById("cmdInput").value;
+
+          const response = await fetch(
+              "http://localhost:8000/terminal",
+              {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                      command: cmd
+                  })
+              }
+          );
+
+          const data = await response.json();
+
+          document.getElementById("output").innerHTML +=
+              `<div>C:\\NeilOS&gt; ${cmd}</div>
+               <div>${data.output}</div>`;
+      }
+    </script>
+
+    <!-- SEARCH -->
+    <div class="window" id="search">
+      <h2>🔎 NeilOS Search</h2>
+      <input id="query" placeholder="search" />
+      <button onclick="searchWeb()">Search</button>
+      <iframe id="browser"></iframe>
+    </div>
+
+    <!-- AI -->
+    <div class="window" id="ai">
+      <h2>🤖 AI Assistant</h2>
+      <div id="ai-output"></div>
+      <input id="ai-input" />
+      <button onclick="askAI()">Send</button>
+    </div>
+
+    <!-- GAMES -->
+    <div class="window" id="games">
+      <h2>🎮 Gaming Center</h2>
+      <button onclick="snakeGame()">Snake</button>
+      <button onclick="guessGame()">Guess</button>
+      <canvas id="gameCanvas" width="500" height="250"></canvas>
+      <pre id="game-output"></pre>
+    </div>
+
+    <!-- CLINIC -->
+    <div class="window" id="clinic">
+      <h2>🏥 Clinic Database</h2>
+      <input id="pname" placeholder="name" />
+      <input id="page" placeholder="age" />
+      <input id="ppayment" placeholder="payment" />
+      <button onclick="addPatient()">Add Patient</button>
+      <table>
+        <tbody id="patients"></tbody>
+      </table>
+    </div>
+
+    <!-- SOCIAL -->
+    <div class="window" id="social">
+      <h2>🌍 SocialNet</h2>
+      <button onclick="showGroups()">Groups</button>
+      <button onclick="showRecommendations()">Recommendations</button>
+      <pre id="social-output"></pre>
+    </div>
+
+    <!-- NETWORK -->
+    <div class="window" id="network">
+      <h2>🌐 Network Center</h2>
+      <button onclick="networkInfo()">Load Network Info</button>
+      <pre id="network-output"></pre>
+    </div>
+
+    <!-- DEPLOY -->
+    <div class="window" id="deploy">
+      <h2>🚀 Deployment Center</h2>
+      <button onclick="deployISO()">Generate ISO</button>
+      <pre id="deploy-output"></pre>
+    </div>
+
+    <!-- KERNEL -->
+    <div class="window" id="kernel">
+      <h2>⚙ Kernel Manager</h2>
+      <pre>
+Kernel: NeilOS Kernel v1.0
+Bootloader: GRUB
+Architecture: x86
+Memory: Protected Mode
+Status: Running
+</pre
+      >
+    </div>
+
+    <!-- MONITOR -->
+    <div class="window" id="monitor">
+      <h2>📊 System Monitor</h2>
+      <pre id="monitor-output"></pre>
+    </div>
+
+    <!-- API -->
+    <div class="window" id="api">
+      <h2>🌐 API Manager</h2>
+      <button onclick="loadAPI()">Fetch API</button>
+      <pre id="api-output"></pre>
+    </div>
+
+    <script>
+      setTimeout(() => {
+        document.getElementById("bootscreen").style.display = "none";
+        document.getElementById("desktop").style.display = "block";
+      }, 2500);
+
+      function openApp(id) {
+        document.querySelectorAll(".window").forEach((w) => {
+          w.style.display = "none";
+        });
+
+        document.getElementById(id).style.display = "block";
+      }
+
+      // DRAG WINDOWS
+
+      document.querySelectorAll(".window").forEach((win) => {
+        let drag = false;
+        let ox = 0;
+        let oy = 0;
+
+        win.onmousedown = (e) => {
+          drag = true;
+          ox = e.offsetX;
+          oy = e.offsetY;
+        };
+
+        document.onmouseup = () => (drag = false);
+
+        document.onmousemove = (e) => {
+          if (drag) {
+            win.style.left = e.pageX - ox + "px";
+            win.style.top = e.pageY - oy + "px";
+          }
+        };
+      });
+
+      // BANK
+
+      const bankStore = Redux.createStore(
+        (state = { bal: 0, tx: [] }, action) => {
+          switch (action.type) {
+            case "DEP":
+              return {
+                ...state,
+                bal: state.bal + action.v,
+                tx: [...state.tx, "+₹" + action.v],
+              };
+
+            case "WIT":
+              return {
+                ...state,
+                bal: state.bal - action.v,
+                tx: [...state.tx, "-₹" + action.v],
+              };
+          }
+
+          return state;
+        },
+      );
+
+      bankStore.subscribe(() => {
+        let s = bankStore.getState();
+
+        document.getElementById("balance").innerText = "₹" + s.bal;
+        document.getElementById("transactions").innerText = s.tx.join("\n");
+      });
+
+      function deposit() {
+        let amt = parseInt(document.getElementById("amt").value);
+        bankStore.dispatch({ type: "DEP", v: amt });
+      }
+
+      function withdraw() {
+        let amt = parseInt(document.getElementById("amt").value);
+        bankStore.dispatch({ type: "WIT", v: amt });
+      }
+
+      // FILES
+
+      let files = [];
+
+      function addFile() {
+        let f = document.getElementById("fname").value;
+
+        files.push(f);
+
+        renderFiles();
+      }
+
+      function renderFiles() {
+        document.getElementById("filelist").innerHTML = files
+          .map((f) => "📄 " + f)
+          .join("<br>");
+      }
+
+      // TERMINAL
+
+      function runCommand() {
+        let cmd = document.getElementById("terminal-input").value;
+        let out = document.getElementById("terminal-output");
+
+        if (cmd === "help") out.innerHTML += "help clear files version<br>";
+        else if (cmd === "files") out.innerHTML += files.join("<br>") + "<br>";
+        else if (cmd === "clear") out.innerHTML = "";
+        else if (cmd === "version") out.innerHTML += "NeilCyberOS v1.0<br>";
+        else out.innerHTML += "Unknown command<br>";
+
+        document.getElementById("terminal-input").value = "";
+      }
+
+      // SEARCH ENGINE
+
+      function searchWeb() {
+        let q = document.getElementById("query").value;
+
+        document.getElementById("browser").src =
+          "https://duckduckgo.com/?q=" + encodeURIComponent(q);
+      }
+      // AI
+
+      function askAI() {
+        let input = document.getElementById("ai-input").value;
+        let out = document.getElementById("ai-output");
+
+        out.innerHTML += "<div>You: " + input + "</div>";
+
+        let res = "AI Ready";
+
+        if (input.includes("hello")) res = "Hello User";
+
+        if (input.includes("scan")) res = "Opening Cyber Security Center";
+
+        out.innerHTML += "<div>AI: " + res + "</div>";
+      }
+
+      // GAMES
+
+      let ctx = document.getElementById("gameCanvas").getContext("2d");
+
+      function snakeGame() {
+        let x = 0;
+
+        if (window.loop) clearInterval(window.loop);
+
+        window.loop = setInterval(() => {
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, 500, 250);
+
+          ctx.fillStyle = "lime";
+          ctx.fillRect(x, 50, 20, 20);
+
+          x += 10;
+
+          if (x > 500) x = 0;
+        }, 100);
+      }
+
+      function guessGame() {
+        document.getElementById("game-output").innerText =
+          "Random Number: " + Math.floor(Math.random() * 100);
+      }
+
+      // CLINIC
+
+      let patients = [];
+
+      function addPatient() {
+        patients.push({
+          name: pname.value,
+          age: page.value,
+          payment: ppayment.value,
+        });
+
+        renderPatients();
+      }
+
+      function renderPatients() {
+        document.getElementById("patients").innerHTML = patients
+          .map(
+            (p) => `
+        <tr>
+            <td>${p.name}</td>
+            <td>${p.age}</td>
+            <td>${p.payment}</td>
+        </tr>
+    `,
+          )
+          .join("");
+      }
+
+      // SOCIAL
+
+      function showGroups() {
+        document.getElementById("social-output").innerText = JSON.stringify([
+          [1],
+          [0, 2],
+          [1],
+        ]);
+      }
+
+      function showRecommendations() {
+        document.getElementById("social-output").innerText = JSON.stringify({
+          user: "cyber_user",
+        });
+      }
+
+      // NETWORK
+
+      function networkInfo() {
+        document.getElementById("network-output").innerText =
+          "IP: 127.0.0.1\nGateway: Active\nDNS: Connected";
+      }
+
+      // DEPLOY
+
+      function deployISO() {
+        document.getElementById("deploy-output").innerText =
+          "Generating NeilOS.iso ... DONE";
+      }
+
+      // SYSTEM MONITOR
+
+      setInterval(() => {
+        document.getElementById("monitor-output").innerText =
+          "CPU: " +
+          Math.floor(Math.random() * 100) +
+          "%\n" +
+          "RAM: " +
+          Math.floor(Math.random() * 100) +
+          "%\n" +
+          "Kernel: Active\n" +
+          "Firewall: Protected";
+      }, 1000);
+
+      // API
+
+      async function loadAPI() {
+        let r = await fetch("https://jsonplaceholder.typicode.com/posts/1");
+
+        let d = await r.json();
+
+        document.getElementById("api-output").innerText = JSON.stringify(
+          d,
+          null,
+          2,
+        );
+      }
+    </script>
+  </body>
+</html>

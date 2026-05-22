@@ -1,0 +1,219 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Segoe UI, sans-serif;
+    background: black;
+    color: white;
+}
+
+#bg {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top left, #002222, black);
+    z-index: -3;
+}
+
+#grid {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background-image:
+        linear-gradient(rgba(0, 255, 213, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 213, 0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: -2;
+    animation: move 10s linear infinite;
+}
+
+@keyframes move {
+    from {
+        transform: translate(0, 0);
+    }
+
+    to {
+        transform: translate(-60px, -60px);
+    }
+}
+
+#bootscreen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+.boot-logo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00ffd5, #003333);
+    box-shadow: 0 0 50px #00ffd5;
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.2);
+    }
+}
+
+#desktop {
+    display: none;
+    padding: 20px;
+}
+
+.icon {
+    display: inline-block;
+    width: 120px;
+    margin: 10px;
+    padding: 15px;
+    border: 1px solid #00ffd5;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.icon:hover {
+    background: #003333;
+}
+
+.window {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 650px;
+    max-height: 80vh;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid #00ffd5;
+    border-radius: 12px;
+    padding: 15px;
+    display: none;
+    box-shadow: 0 0 20px #00ffd5;
+}
+
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background: #001111;
+    border-top: 1px solid #00ffd5;
+    line-height: 40px;
+    padding-left: 15px;
+}
+
+input,
+button {
+    width: 100%;
+    margin: 6px 0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+input {
+    background: black;
+    color: #00ffd5;
+    border: 1px solid #00ffd5;
+}
+
+button {
+    background: #00ffd5;
+    color: black;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #00ffaa;
+}
+
+pre,
+#terminal-output,
+#ai-output {
+    background: #111;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+    margin-top: 10px;
+    background: black;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    border: 1px solid #00ffd5;
+    padding: 8px;
+}
+
+/* Window minimize/maximize/close */
+.window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #00ffd5;
+    border-radius: 12px 12px 0 0;
+}
+
+.window-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.window-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #00ffd5;
+    background: #00ffd5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.window-btn-close {
+    background: #ff4444;
+    border-color: #ff4444;
+}
+
+.window-btn-min {
+    background: #ffcc00;
+    border-color: #ffcc00;
+}
+
+/* Resize handles */
+.window {
+    cursor: move;
+    resize: both;
+    overflow: auto;
+}
+
+/* Minimize state */
+.window.minimized {
+    display: none;
+}

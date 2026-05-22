@@ -1,0 +1,378 @@
+-- ==========================================
+-- NeilOS Database
+-- ==========================================
+
+CREATE DATABASE IF NOT EXISTS neilos;
+
+USE neilos;
+
+-- ==========================================
+-- USERS
+-- ==========================================
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    email VARCHAR(255),
+    role VARCHAR(50) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- BANKING
+-- ==========================================
+
+CREATE TABLE bank_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    balance DECIMAL(15,2) DEFAULT 0.00,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE bank_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    account_id INT NOT NULL,
+
+    transaction_type ENUM(
+        'deposit',
+        'withdraw',
+        'transfer'
+    ) NOT NULL,
+
+    amount DECIMAL(15,2) NOT NULL,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (account_id)
+    REFERENCES bank_accounts(id)
+    ON DELETE CASCADE
+);
+
+-- ==========================================
+-- FILE MANAGER
+-- ==========================================
+
+CREATE TABLE files (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    owner_id INT,
+
+    filename VARCHAR(255),
+
+    file_type VARCHAR(50),
+
+    file_size BIGINT DEFAULT 0,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL
+);
+
+-- ==========================================
+-- TERMINAL HISTORY
+-- ==========================================
+
+CREATE TABLE terminal_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    command_text TEXT,
+
+    command_output LONGTEXT,
+
+    executed_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL
+);
+
+-- ==========================================
+-- SEARCH ENGINE
+-- ==========================================
+
+CREATE TABLE search_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    query_text VARCHAR(500),
+
+    searched_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL
+);
+
+-- ==========================================
+-- AI ASSISTANT
+-- ==========================================
+
+CREATE TABLE ai_conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    user_message LONGTEXT,
+
+    ai_response LONGTEXT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL
+);
+
+-- ==========================================
+-- CYBER SECURITY
+-- ==========================================
+
+CREATE TABLE cyber_scans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    target_ip VARCHAR(100),
+
+    threat_level VARCHAR(50),
+
+    result LONGTEXT,
+
+    scanned_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE security_alerts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    alert_type VARCHAR(100),
+
+    severity VARCHAR(50),
+
+    description LONGTEXT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- NETWORK CENTER
+-- ==========================================
+
+CREATE TABLE network_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    hostname VARCHAR(255),
+
+    ip_address VARCHAR(100),
+
+    gateway VARCHAR(100),
+
+    dns VARCHAR(255),
+
+    recorded_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- CLINIC DATABASE
+-- ==========================================
+
+CREATE TABLE patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    patient_name VARCHAR(255),
+
+    age INT,
+
+    gender VARCHAR(20),
+
+    payment DECIMAL(12,2),
+
+    diagnosis TEXT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- SOCIALNET
+-- ==========================================
+
+CREATE TABLE social_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    username VARCHAR(100),
+
+    profile_text TEXT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE friendships (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    friend_id INT,
+
+    FOREIGN KEY (user_id)
+    REFERENCES social_users(id)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY (friend_id)
+    REFERENCES social_users(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE social_posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    post_content LONGTEXT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES social_users(id)
+    ON DELETE CASCADE
+);
+
+-- ==========================================
+-- DEPLOYMENT CENTER
+-- ==========================================
+
+CREATE TABLE deployment_jobs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    build_name VARCHAR(255),
+
+    build_type VARCHAR(100),
+
+    status VARCHAR(100),
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- API MANAGER
+-- ==========================================
+
+CREATE TABLE api_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    endpoint VARCHAR(255),
+
+    request_method VARCHAR(20),
+
+    status_code INT,
+
+    response_time_ms INT,
+
+    requested_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- SYSTEM MONITOR
+-- ==========================================
+
+CREATE TABLE system_metrics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    cpu_usage FLOAT,
+
+    ram_usage FLOAT,
+
+    disk_usage FLOAT,
+
+    network_usage FLOAT,
+
+    recorded_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- KERNEL EVENTS
+-- ==========================================
+
+CREATE TABLE kernel_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    log_level VARCHAR(20),
+
+    subsystem VARCHAR(100),
+
+    message LONGTEXT,
+
+    logged_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- APPLICATION REGISTRY
+-- ==========================================
+
+CREATE TABLE applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    app_name VARCHAR(255),
+
+    app_version VARCHAR(50),
+
+    app_status VARCHAR(50),
+
+    installed_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- SAMPLE APPLICATIONS
+-- ==========================================
+
+INSERT INTO applications
+(app_name, app_version, app_status)
+VALUES
+('Banking System', '1.0', 'installed'),
+('File Manager', '1.0', 'installed'),
+('Terminal', '1.0', 'installed'),
+('Search Engine', '1.0', 'installed'),
+('Cyber Security', '1.0', 'installed'),
+('Network Center', '1.0', 'installed'),
+('AI Assistant', '1.0', 'installed'),
+('Clinic Database', '1.0', 'installed'),
+('SocialNet', '1.0', 'installed'),
+('Deployment Center', '1.0', 'installed'),
+('Kernel Manager', '1.0', 'installed'),
+('System Monitor', '1.0', 'installed'),
+('API Manager', '1.0', 'installed');
+
+-- ==========================================
+-- DEFAULT ADMIN USER
+-- ==========================================
+
+INSERT INTO users
+(username, email, role)
+VALUES
+(
+    'admin',
+    'admin@neilos.local',
+    'administrator'
+);
