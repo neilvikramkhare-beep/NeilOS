@@ -1,0 +1,70 @@
+# NeilOS Kernel System File
+# Created: 2026-06-04
+# Purpose: Kernel configuration, boot manifest and service definitions
+# Format: INI-like plain text (human readable + machine-parseable)
+
+[Kernel]
+name = NeilOS Kernel
+version = 1.0.0
+build_date = 2026-06-04
+author = NeilOS Team
+homepage = https://example.local/neilos
+entry_point = NeilOS.py
+boot_timeout = 5     ; seconds to show boot splash
+safe_mode = False
+
+[Boot]
+loader = simple_boot
+init_script = NeilOS.py
+modules_dir = modules
+default_runlevel = 3
+
+[Modules]
+# Core kernel modules loaded on boot (order matters)
+core = kernel, security, filesystem, network, gui
+optional = ai, metrics, telemetry
+
+[Files]
+database = neilos.db
+backup_dir = neilos_backups
+notes_sync = neilos_notes.txt
+default_files = kernel.sys, config.cfg, root.py, notes.txt, welcome.txt
+
+[Services]
+scheduler = enabled
+auto_update = disabled
+update_server = https://updates.example.local/neilos
+ssh = disabled
+http = disabled
+
+[Security]
+signature = none
+integrity_check = True
+hash_algorithm = sha256
+
+[Users]
+default_user = guest
+allow_root_login = False
+auto_login = False
+
+[Logging]
+log_level = INFO
+log_file = kernel.log
+security_log_db = neilos.db
+
+[Recovery]
+enable_watchdog = True
+watchdog_timeout = 30
+last_good_config = kernel.sys
+
+[Notes]
+; This file is a simple kernel manifest for NeilOS. It is intentionally
+; minimal and human-editable. The real behaviour for services and modules
+; is implemented in the Python entry point specified by `entry_point`.
+;
+; To add new modules, append to the `optional` or `core` lists and ensure
+; required handlers are implemented in the application code (NeilOS.py).
+
+[SignaturePlaceholder]
+; If you sign your kernel file add a base64 signature here for verification
+; signature = <base64-signature-here>
