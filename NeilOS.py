@@ -275,7 +275,7 @@ PROGRAMMING_LANGUAGES = {
     "Python": {
         "extension": ".py",
         "template": '# Python Program\n\nprint("Hello, World!")',
-        "runner": "python",
+        "runner": "earth",
         "color": "#3776AB",
         "url": "https://www.programiz.com/python-programming/online-compiler/",
         "docs": "https://docs.python.org/3/",
@@ -453,9 +453,9 @@ PROGRAMMING_LANGUAGES = {
         "tutorial": "https://dart.dev/tutorials"
     },
     "Earth": {
-        "extension": ".earth",
-        "template": '# Earth Language Program\n\nprint("Hello from Earth!")\nprint("🌍 Welcome to Earth programming 🌍")',
-        "runner": "python",
+        "extension": ".sl",
+        "template": '// Earth Language Program\n\ndefine main():\n    print("Hello from Earth!");\n    print("🌍 Welcome to Earth programming 🌍");\n',
+        "runner": "earth",
         "color": "#2E8B57",
         "docs": "https://climate.nasa.gov/",
         "tutorial": "https://www.un.org/sustainabledevelopment/"
@@ -648,7 +648,8 @@ apps = [
     DesktopApp("Kernel", "⚙", "kernel"),
     DesktopApp("Notes", "📝", "notes"),
     DesktopApp("Code Studio", "💻", "code_studio"),
-    DesktopApp("Animator", "🎬", "animator")
+    DesktopApp("Animator", "🎬", "animator"),
+    DesktopApp("EarthStudio", "🌍", "earth_studio")
 ]
 
 # ============================================================
@@ -1180,6 +1181,28 @@ def open_file_explorer():
         subprocess.Popen(["open", DESKTOP_PATH])
     else:  # Linux
         subprocess.Popen(["xdg-open", DESKTOP_PATH])
+
+def open_file_prompt():
+    """Open a specific file using the host OS backend"""
+    filename = simpledialog.askstring("Open File", "Enter filename to open:")
+    if filename:
+        filepath = os.path.join(DESKTOP_PATH, filename)
+        if not os.path.exists(filepath):
+            if filename in FILES:
+                messagebox.showinfo("Error", "Internal virtual file cannot be opened directly by OS. Please use desktop files.")
+                return
+            messagebox.showerror("Error", f"File '{filename}' not found on Desktop.")
+            return
+        
+        try:
+            if platform.system() == "Windows":
+                os.startfile(filepath)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", filepath])
+            else:
+                subprocess.Popen(["xdg-open", filepath])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open file:\n{e}")
 
 def draw_files():
     draw_window("Files - Desktop Linked", "#f59e0b")
@@ -2230,11 +2253,7 @@ def mitm_detection():
              bg="#3b82f6", fg="white").pack(pady=5)
 
 def network_scanner():
-    """Scan network for devices"""
-    network = simpledialog.askstring("Network Scanner", "Enter network (e.g., 192.168.1.0/24):")
-    if not network:
-        network = "192.168.1.0/24"
-    
+    """Scan network for devices using arp"""
     result_window = tk.Toplevel()
     result_window.title("Network Scanner")
     result_window.geometry("600x500")
@@ -2243,197 +2262,105 @@ def network_scanner():
     text_area = tk.Text(result_window, bg="#1e1e1e", fg="#00ff00", font=("Consolas", 10))
     text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     
-    text_area.insert(tk.END, f"🌐 NETWORK SCAN\n")
-    text_area.insert(tk.END, f"Network: {network}\n")
+    text_area.insert(tk.END, f"🌐 NETWORK SCAN (ARP)\n")
     text_area.insert(tk.END, f"Time: {datetime.datetime.now()}\n")
     text_area.insert(tk.END, "━" * 50 + "\n\n")
-    
-    # Simulate network scan
-    devices_found = random.randint(3, 15)
     text_area.insert(tk.END, f"Scanning network...\n\n")
     
-    for i in range(devices_found):
-        ip = f"192.168.1.{random.randint(1, 254)}"
-        mac = ":".join([f"{random.randint(0,255):02x}" for _ in range(6)])
-        hostname = f"device-{random.randint(100,999)}"
+    def run_scan():
+        try:
+            result = subprocess.run(["arp", "-a"], capture_output=True, text=True, creationflags=0x08000000 if os.name == 'nt' else 0)
+            text_area.insert(tk.END, result.stdout)
+            
+            lines = result.stdout.split('\n')
+            devices = [line for line in lines if "dynamic" in line.lower() or "static" in line.lower()]
+            CYBER_LOG.append(f"[SCAN] Network scan completed - {len(devices)} devices found")
+        except Exception as e:
+            text_area.insert(tk.END, f"Scan failed: {e}\n")
         
-        text_area.insert(tk.END, f"Device {i+1}:\n")
-        text_area.insert(tk.END, f"  IP: {ip}\n")
-        text_area.insert(tk.END, f"  MAC: {mac}\n")
-        text_area.insert(tk.END, f"  Hostname: {hostname}\n")
+        tk.Button(result_window, text="Close", command=result_window.destroy, bg="#3b82f6", fg="white").pack(pady=5)
         
-        # Add device to global list
-        NETWORK_DEVICES.append({"ip": ip, "mac": mac, "hostname": hostname})
-        
-        text_area.insert(tk.END, "\n")
-        result_window.update()
-        time.sleep(0.1)
-    
-    text_area.insert(tk.END, "━" * 50 + "\n")
-    text_area.insert(tk.END, f"✅ Scan complete. {devices_found} devices found.\n")
-    
-    CYBER_LOG.append(f"[SCAN] Network scan completed - {devices_found} devices found")
-    
-    def close_window():
-        result_window.destroy()
-    
-    tk.Button(result_window, text="Close", command=close_window, 
-             bg="#3b82f6", fg="white").pack(pady=5)
+    threading.Thread(target=run_scan, daemon=True).start()
 
 def nmap_scan():
-    """Simulate Nmap style port scanning"""
-    target = simpledialog.askstring("Nmap Scan", "Target IP or Hostname:")
+    """Real port scanning via PowerShell"""
+    target = simpledialog.askstring("Port Scan", "Target IP or Hostname:")
     if not target:
         return
     
     result_window = tk.Toplevel()
-    result_window.title("Nmap Scan Results")
+    result_window.title("Port Scan Results")
     result_window.geometry("700x600")
     result_window.configure(bg="#1e1e1e")
     
     text_area = tk.Text(result_window, bg="#1e1e1e", fg="#00ff00", font=("Consolas", 10))
     text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     
-    text_area.insert(tk.END, f"🔍 NMAP SCAN REPORT\n")
+    text_area.insert(tk.END, f"🔍 PORT SCAN REPORT\n")
     text_area.insert(tk.END, f"Target: {target}\n")
     text_area.insert(tk.END, f"Time: {datetime.datetime.now()}\n")
     text_area.insert(tk.END, "━" * 60 + "\n\n")
     
-    common_ports = {
-        21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP", 53: "DNS",
-        80: "HTTP", 110: "POP3", 143: "IMAP", 443: "HTTPS", 3306: "MySQL",
-        3389: "RDP", 5432: "PostgreSQL", 8080: "HTTP-Alt", 27017: "MongoDB"
-    }
-    
-    text_area.insert(tk.END, "PORT     STATE    SERVICE\n")
-    text_area.insert(tk.END, "─────    ─────    ───────\n")
-    
-    open_ports = []
-    for port in common_ports:
-        if random.random() < 0.3:  # 30% chance port is open
-            status = "open"
-            open_ports.append(port)
-            color = "#10b981"
-        else:
-            status = "closed"
-            color = "#6b7280"
+    def run_port_scan():
+        common_ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 3389, 8080]
+        import socket
+        try:
+            found_open = False
+            for p in common_ports:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(1.0)
+                result = sock.connect_ex((target, p))
+                if result == 0:
+                    text_area.insert(tk.END, f"Port {p} is OPEN\n")
+                    found_open = True
+                sock.close()
+            if found_open:
+                CYBER_LOG.append(f"[PORT_SCAN] Scan completed on {target}")
+            else:
+                text_area.insert(tk.END, "No common ports are open or host is unreachable.\n")
+        except Exception as e:
+            text_area.insert(tk.END, f"Scan failed: {e}\n")
+            
+        tk.Button(result_window, text="Close", command=result_window.destroy, bg="#3b82f6", fg="white").pack(pady=5)
         
-        text_area.insert(tk.END, f"{port:<8} {status:<8} {common_ports[port]}\n")
-        result_window.update()
-        time.sleep(0.05)
-    
-    # Scan additional random ports
-    text_area.insert(tk.END, "\nScanning additional ports...\n")
-    for _ in range(10):
-        port = random.randint(1024, 65535)
-        if random.random() < 0.1:
-            text_area.insert(tk.END, f"{port:<8} open     unknown\n")
-            open_ports.append(port)
-        result_window.update()
-        time.sleep(0.02)
-    
-    text_area.insert(tk.END, "\n" + "━" * 60 + "\n")
-    text_area.insert(tk.END, f"✅ Scan complete. {len(open_ports)} open ports found.\n")
-    
-    if open_ports:
-        text_area.insert(tk.END, f"\nOpen ports: {', '.join(map(str, open_ports[:10]))}\n")
-    
-    CYBER_LOG.append(f"[NMAP] Scan completed on {target} - {len(open_ports)} open ports")
-    
-    def close_window():
-        result_window.destroy()
-    
-    tk.Button(result_window, text="Close", command=close_window, 
-             bg="#3b82f6", fg="white").pack(pady=5)
+    threading.Thread(target=run_port_scan, daemon=True).start()
 
 def url_scanner():
-    """Scan URL for security threats"""
-    url = simpledialog.askstring("URL Scanner", "Enter URL to scan:")
+    """Scan URL by checking HTTP response"""
+    url = simpledialog.askstring("URL Scanner", "Enter URL to scan (include http/https):")
     if not url:
         return
+        
+    if not url.startswith("http"):
+        url = "http://" + url
     
     result_window = tk.Toplevel()
     result_window.title("URL Security Scanner")
     result_window.geometry("600x500")
     result_window.configure(bg="#1e1e1e")
     
-    text_area = tk.Text(result_window, bg="#1e1e1e", font=("Consolas", 10))
+    text_area = tk.Text(result_window, bg="#1e1e1e", fg="#00ff00", font=("Consolas", 10))
     text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     
     text_area.insert(tk.END, f"🔗 URL SECURITY SCAN\n")
     text_area.insert(tk.END, f"URL: {url}\n")
-    text_area.insert(tk.END, f"Time: {datetime.datetime.now()}\n")
     text_area.insert(tk.END, "━" * 50 + "\n\n")
     
-    # Analyze URL
-    risk_score = 0
-    warnings = []
-    
-    # Check for URL patterns
-    if "http" in url.lower() and "https" not in url.lower():
-        warnings.append("⚠️ Missing HTTPS encryption")
-        risk_score += 2
-    
-    suspicious_patterns = [
-        "login", "verify", "secure", "account", "update", "confirm",
-        "bank", "paypal", "amazon", "apple", "microsoft", "google"
-    ]
-    
-    for pattern in suspicious_patterns:
-        if pattern in url.lower():
-            warnings.append(f"⚠️ Contains '{pattern}' - potential phishing")
-            risk_score += 1
-    
-    if re.search(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', url):
-        warnings.append("⚠️ Uses IP address instead of domain name")
-        risk_score += 3
-    
-    if len(url) > 100:
-        warnings.append("⚠️ Unusually long URL")
-        risk_score += 1
-    
-    # Check for URL shorteners
-    shorteners = ["bit.ly", "tinyurl", "goo.gl", "ow.ly", "is.gd", "buff.ly"]
-    for shortener in shorteners:
-        if shortener in url.lower():
-            warnings.append(f"⚠️ Uses URL shortener ({shortener}) - destination hidden")
-            risk_score += 2
-    
-    # Determine risk level
-    if risk_score >= 5:
-        risk_level = "🔴 HIGH RISK"
-        risk_color = "#ef4444"
-        recommendation = "DO NOT OPEN - Block this URL immediately"
-    elif risk_score >= 2:
-        risk_level = "🟡 MEDIUM RISK"
-        risk_color = "#f59e0b"
-        recommendation = "Exercise caution - Verify before opening"
-    else:
-        risk_level = "🟢 LOW RISK"
-        risk_color = "#10b981"
-        recommendation = "URL appears safe"
-    
-    text_area.insert(tk.END, f"Risk Level: {risk_level}\n\n", "risk")
-    text_area.tag_config("risk", foreground=risk_color)
-    
-    text_area.insert(tk.END, f"Risk Score: {risk_score}/10\n\n")
-    
-    if warnings:
-        text_area.insert(tk.END, "Findings:\n")
-        for warning in warnings:
-            text_area.insert(tk.END, f"{warning}\n")
-    else:
-        text_area.insert(tk.END, "No obvious threats detected.\n")
-    
-    text_area.insert(tk.END, f"\nRecommendation: {recommendation}\n")
-    
-    CYBER_LOG.append(f"[URL_SCAN] Scanned {url[:50]} - Risk score: {risk_score}")
-    
-    def close_window():
-        result_window.destroy()
-    
-    tk.Button(result_window, text="Close", command=close_window, 
-             bg="#3b82f6", fg="white").pack(pady=5)
+    def run_url_scan():
+        try:
+            response = requests.head(url, allow_redirects=True, timeout=5)
+            text_area.insert(tk.END, f"Status Code: {response.status_code}\n")
+            text_area.insert(tk.END, f"Final URL: {response.url}\n\n")
+            text_area.insert(tk.END, "Headers:\n")
+            for k, v in response.headers.items():
+                text_area.insert(tk.END, f"{k}: {v}\n")
+            CYBER_LOG.append(f"[URL_SCAN] Scanned {url[:50]} - Status {response.status_code}")
+        except Exception as e:
+            text_area.insert(tk.END, f"Failed to connect: {e}\n")
+            
+        tk.Button(result_window, text="Close", command=result_window.destroy, bg="#3b82f6", fg="white").pack(pady=5)
+        
+    threading.Thread(target=run_url_scan, daemon=True).start()
 
 def sms_bomber_simulator():
     """Simulate SMS bomber (educational only)"""
@@ -2833,6 +2760,46 @@ def badusb_detector():
     tk.Button(result_window, text="Close", command=close_window, 
              bg="#3b82f6", fg="white").pack(pady=5)
 
+def gmail_investigation_tool():
+    """Gmail Investigation Tool via PowerShell"""
+    target = simpledialog.askstring("Gmail Investigation", "Enter Gmail domain or email to investigate:")
+    if not target:
+        return
+    
+    if "@" in target:
+        target = target.split("@")[1]
+        
+    result_window = tk.Toplevel()
+    result_window.title("Gmail Investigation Tool (PowerShell)")
+    result_window.geometry("700x500")
+    result_window.configure(bg="#1e1e1e")
+    
+    text_area = tk.Text(result_window, bg="#1e1e1e", fg="#00ff00", font=("Consolas", 10))
+    text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    text_area.insert(tk.END, f"🔍 Running PowerShell Investigation on {target}...\n\n")
+    
+    def run_ps():
+        try:
+            text_area.insert(tk.END, f"Starting Gmail Investigation for {target}...\n")
+            text_area.insert(tk.END, "Checking MX Records...\n")
+            
+            creation_flags = 0x08000000 if os.name == 'nt' else 0
+            mx_result = subprocess.run(["nslookup", "-type=MX", target], capture_output=True, text=True, creationflags=creation_flags)
+            text_area.insert(tk.END, mx_result.stdout + "\n")
+            
+            text_area.insert(tk.END, "Checking TXT (SPF/DMARC) Records...\n")
+            txt_result = subprocess.run(["nslookup", "-type=TXT", target], capture_output=True, text=True, creationflags=creation_flags)
+            text_area.insert(tk.END, txt_result.stdout + "\n")
+            
+            text_area.insert(tk.END, "Investigation Complete.\n")
+        except Exception as e:
+            text_area.insert(tk.END, f"\nFailed to run investigation script: {e}")
+            
+        CYBER_LOG.append(f"[GMAIL_INV] Investigated {target}")
+        tk.Button(result_window, text="Close", command=result_window.destroy, bg="#ef4444", fg="white").pack(pady=5)
+        
+    threading.Thread(target=run_ps, daemon=True).start()
+
 def run_security_scan():
     global DETECTED_THREATS
     CYBER_LOG.append("[OK] Filesystem scan completed.")
@@ -2918,6 +2885,10 @@ def draw_cyber():
     register_click("badusb", -340, 40, 140, 35, badusb_detector)
     draw_rect(-340, 40, 140, 35, "#111827", "#ec4899")
     draw_text("BadUSB Detector", -320, 20, "white", 8)
+
+    register_click("gmail_inv", -180, 40, 140, 35, gmail_investigation_tool)
+    draw_rect(-180, 40, 140, 35, "#111827", "#ec4899")
+    draw_text("Gmail Investigate", -165, 20, "white", 8)
     
     # Row 6: Antivirus Creator
     register_click("antivirus", -500, -20, 300, 40, open_antivirus)
@@ -4121,6 +4092,22 @@ def open_code_editor():
             elif CURRENT_LANGUAGE == "HTML/CSS":
                 webbrowser.open(f"file://{os.path.abspath(temp_file)}")
                 output = "HTML file opened in browser"
+            elif CURRENT_LANGUAGE == "Earth":
+                def exec_earth():
+                    try:
+                        cmd = f'earth "{temp_file}"'
+                        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=0x08000000 if os.name == 'nt' else 0)
+                        for line in iter(process.stdout.readline, ''):
+                            output_text.insert(tk.END, line)
+                            output_text.see(tk.END)
+                        for line in iter(process.stderr.readline, ''):
+                            output_text.insert(tk.END, line)
+                            output_text.see(tk.END)
+                        process.wait()
+                    except Exception as e:
+                        output_text.insert(tk.END, f"Error: {e}\n")
+                threading.Thread(target=exec_earth, daemon=True).start()
+                output = "Launching Earth Environment..."
             elif CURRENT_LANGUAGE == "Bash":
                 result = subprocess.run(["bash", temp_file], 
                                        capture_output=True, text=True, timeout=10)
@@ -4423,6 +4410,170 @@ def boot():
         y -= 35
 
 # ============================================================
+# EARTH STUDIO - Dedicated Earth Language IDE
+# ============================================================
+
+EARTH_PROJECTS_DIR = os.path.join(DESKTOP_PATH, "EarthProjects")
+os.makedirs(EARTH_PROJECTS_DIR, exist_ok=True)
+
+def open_earth_studio():
+    studio_window = tk.Toplevel()
+    studio_window.title("Earth Studio IDE")
+    studio_window.geometry("1000x700")
+    studio_window.configure(bg="#1e1e1e")
+    
+    # Left panel for projects
+    left_frame = tk.Frame(studio_window, width=250, bg="#252526")
+    left_frame.pack(side=tk.LEFT, fill=tk.Y)
+    
+    tk.Label(left_frame, text="Earth Projects", bg="#252526", fg="white", font=("Arial", 11, "bold")).pack(pady=(10, 0))
+    project_listbox = tk.Listbox(left_frame, bg="#1e1e1e", fg="#2E8B57", font=("Consolas", 10), selectbackground="#37373d")
+    project_listbox.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    tk.Label(left_frame, text="Built-in SL_PACKAGES", bg="#252526", fg="white", font=("Arial", 11, "bold")).pack(pady=(10, 0))
+    package_listbox = tk.Listbox(left_frame, bg="#1e1e1e", fg="#3b82f6", font=("Consolas", 10), selectbackground="#37373d")
+    package_listbox.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    # Right panel for editor and console
+    right_frame = tk.Frame(studio_window, bg="#1e1e1e")
+    right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+    
+    # Toolbar
+    toolbar = tk.Frame(right_frame, bg="#333333", height=40)
+    toolbar.pack(fill=tk.X)
+    
+    # Text area
+    text_frame = tk.Frame(right_frame, bg="#1e1e1e")
+    text_frame.pack(fill=tk.BOTH, expand=True)
+    
+    text_widget = tk.Text(text_frame, bg="#1e1e1e", fg="#d4d4d4", insertbackground="white", font=("Consolas", 12))
+    text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    
+    scrollbar = tk.Scrollbar(text_frame, command=text_widget.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    text_widget.config(yscrollcommand=scrollbar.set)
+    
+    # Console area
+    console_frame = tk.Frame(right_frame, bg="#1e1e1e", height=150)
+    console_frame.pack(fill=tk.X, side=tk.BOTTOM)
+    
+    console_text = tk.Text(console_frame, bg="#000000", fg="#00ff00", font=("Consolas", 10), height=10)
+    console_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    current_file = {"path": None}
+    SL_PACKAGES_DIR = os.path.join(DESKTOP_PATH, "Earth", "SL_Packages")
+    
+    def refresh_projects():
+        project_listbox.delete(0, tk.END)
+        for root, _, files in os.walk(EARTH_PROJECTS_DIR):
+            for f in files:
+                if f.endswith((".sl", ".eh", ".et", ".eth")):
+                    rel = os.path.relpath(os.path.join(root, f), EARTH_PROJECTS_DIR)
+                    project_listbox.insert(tk.END, rel)
+                    
+        package_listbox.delete(0, tk.END)
+        if os.path.exists(SL_PACKAGES_DIR):
+            for f in os.listdir(SL_PACKAGES_DIR):
+                if f.endswith((".sl", ".eh", ".et", ".eth")):
+                    package_listbox.insert(tk.END, f)
+                    
+    def load_project_file(event):
+        selection = project_listbox.curselection()
+        if selection:
+            package_listbox.selection_clear(0, tk.END)
+            rel_path = project_listbox.get(selection[0])
+            full_path = os.path.join(EARTH_PROJECTS_DIR, rel_path)
+            current_file["path"] = full_path
+            with open(full_path, "r", encoding="utf-8") as f:
+                text_widget.delete("1.0", tk.END)
+                text_widget.insert("1.0", f.read())
+            studio_window.title(f"Earth Studio IDE - {rel_path}")
+
+    def load_package_file(event):
+        selection = package_listbox.curselection()
+        if selection:
+            project_listbox.selection_clear(0, tk.END)
+            rel_path = package_listbox.get(selection[0])
+            full_path = os.path.join(SL_PACKAGES_DIR, rel_path)
+            current_file["path"] = full_path
+            with open(full_path, "r", encoding="utf-8") as f:
+                text_widget.delete("1.0", tk.END)
+                text_widget.insert("1.0", f.read())
+            studio_window.title(f"Earth Studio IDE - SL_PACKAGES/{rel_path} (Read-Only)")
+            
+    project_listbox.bind("<<ListboxSelect>>", load_project_file)
+    package_listbox.bind("<<ListboxSelect>>", load_package_file)
+    
+    def new_file():
+        name = simpledialog.askstring("New Earth File", "Filename (with .sl, .eh, .et, or .eth extension):")
+        if name:
+            if not name.endswith((".sl", ".eh", ".et", ".eth")):
+                name += ".sl"
+            path = os.path.join(EARTH_PROJECTS_DIR, name)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("// Earth Language\n\ndefine main():\n    print(\"Hello Earth!\");\n")
+            refresh_projects()
+            
+    def save_file():
+        if current_file["path"]:
+            if "SL_Packages" in current_file["path"]:
+                console_text.insert(tk.END, "[System] Cannot save built-in SL_PACKAGES directly.\n")
+                return
+            with open(current_file["path"], "w", encoding="utf-8") as f:
+                f.write(text_widget.get("1.0", tk.END))
+            console_text.insert(tk.END, f"[System] Saved {current_file['path']}\n")
+            
+    def run_file():
+        save_file()
+        if current_file["path"]:
+            console_text.delete("1.0", tk.END)
+            console_text.insert(tk.END, f"Running {current_file['path']}...\n")
+            
+            def execute():
+                try:
+                    cmd = f'earth "{current_file["path"]}"'
+                    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=0x08000000 if os.name == 'nt' else 0)
+                    
+                    for line in iter(process.stdout.readline, ''):
+                        console_text.insert(tk.END, line)
+                        console_text.see(tk.END)
+                        
+                    for line in iter(process.stderr.readline, ''):
+                        console_text.insert(tk.END, line)
+                        console_text.see(tk.END)
+                        
+                    process.wait()
+                    console_text.insert(tk.END, f"\n[Process completed with exit code {process.returncode}]\n")
+                    console_text.see(tk.END)
+                except Exception as e:
+                    console_text.insert(tk.END, f"Error: {e}\nIs 'earth' compiler installed globally?\n")
+                    console_text.see(tk.END)
+                    
+            threading.Thread(target=execute, daemon=True).start()
+                
+    tk.Button(toolbar, text="📄 New File", command=new_file, bg="#4CAF50", fg="white", bd=0, padx=10).pack(side=tk.LEFT, padx=5, pady=5)
+    tk.Button(toolbar, text="💾 Save", command=save_file, bg="#2196F3", fg="white", bd=0, padx=10).pack(side=tk.LEFT, padx=5, pady=5)
+    tk.Button(toolbar, text="▶ Run Earth Code", command=run_file, bg="#e91e63", fg="white", bd=0, padx=10).pack(side=tk.LEFT, padx=5, pady=5)
+    
+    refresh_projects()
+
+
+def draw_earth_studio():
+    draw_window("Earth Studio - Earth Language IDE", "#2E8B57")
+    draw_text("🌍 Earth Language Programming", -500, 300, "#2E8B57", 14, "bold")
+    draw_text("The official IDE for Earth (.sl, .eh, .et, .eth) projects", -500, 270, "white", 10)
+    
+    register_click("launch_earth_ide", -200, 200, 300, 60, open_earth_studio)
+    draw_rect(-200, 200, 300, 60, "#111827", "#2E8B57")
+    draw_text("🌍 Launch Earth Studio", -160, 170, "white", 12)
+    
+    draw_text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", -500, 120, "#2E8B57", 8)
+    draw_text("✨ Features:", -500, 90, "#2E8B57", 11, "bold")
+    draw_text("• Built-in project explorer", -500, 65, "white", 9)
+    draw_text("• Direct integration with Earth global compiler", -500, 45, "white", 9)
+    draw_text("• Syntax and execution support for all Earth extensions", -500, 25, "white", 9)
+
+# ============================================================
 # MAIN RENDERER
 # ============================================================
 
@@ -4468,6 +4619,8 @@ def render():
         draw_code_studio()
     elif CURRENT_APP == "animator":
         draw_animator()
+    elif CURRENT_APP == "earth_studio":
+        draw_earth_studio()
     
     screen.update()
 
